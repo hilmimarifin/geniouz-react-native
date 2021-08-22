@@ -9,7 +9,7 @@ import PlaceHolder from '../../components/PlaceHolder';
 
 
 const ListItem = ({product}) => {
-  const {name, variants, salePrice, images, id} = product;
+  const {name, variants, salePrice, images, code, id} = product;
   const dispatch = useDispatch();
   const {navigate} = useNavigation();
   const handlePress = () => {
@@ -35,6 +35,7 @@ const ListItem = ({product}) => {
           <Text small bold>
             {name}
           </Text>
+          <Text small>{code}</Text>
           <Text small>{salePrice}</Text>
           <Text small>{productStock} pcs</Text>
 

@@ -11,7 +11,7 @@ const propTypes = {
   title: PropTypes.string.isRequired,
 };
 
-const Header = ({title, theme, backButton, addButton}) => (
+const Header = ({title, theme, backButton, addButton, actionAdd}) => (
   <View style={styles.headerContainer}>
     { backButton ?
       <View style={styles.backButton}>
@@ -23,7 +23,7 @@ const Header = ({title, theme, backButton, addButton}) => (
     </Text>
     {addButton ?
       <View>
-        <HeaderAdd page={addButton}/>
+        <HeaderAdd page={addButton} action={actionAdd}/>
       </View> : <View/>
     }
   </View>

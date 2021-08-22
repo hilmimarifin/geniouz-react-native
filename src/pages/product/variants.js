@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import {View, Platform, ActivityIndicator, Image, FlatList, TouchableOpacity} from 'react-native';
+import {View, Switch, Platform, ActivityIndicator, Image, FlatList, TouchableOpacity} from 'react-native';
 import { useDispatch} from 'react-redux';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
@@ -10,15 +10,19 @@ import { addVariant, editVariant } from '../../redux/actions/products-action';
 import NumberInput from '../../components/NumberInput';
 import { useNavigation } from '@react-navigation/native';
 import { reactor } from '../../redux/actions/reactor-action';
+import Text from '../../components/Text';
 const Variants = ({route}) => {
-    const {goBack} = useNavigation();
+    const {goBack, navigate} = useNavigation();
     const dispatch = useDispatch();
     const [form, setForm] = useForm(route.params || {});
-    const {color, size, id, index} = route.params || {};
-    const data =  {  id: id,
+    const {color, size, id, index, productId, longSleeve} = route.params || {};
+    const [isEnabled, setIsEnabled] = useState(longSleeve || false);
+    const data =  {  
+                     id: id,
                      index: index,
                      variants:{
                                 color: form.color ,
+                                longSleeve: isEnabled,
                                 size: { m: form.size_m || (size ? size.m : 0) ,
                                         l: form.size_l || (size ? size.l : 0) ,
                                         xl: form.size_xl || (size ? size.xl : 0) ,
@@ -31,10 +35,24 @@ const Variants = ({route}) => {
       dispatch(reactor());
       goBack();
     };
+
+    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    console.log('isenabled', data.variants)
   return (
     <Container>
       <View>
         <TextInput label="Warna" onChangeText={(x)=> setForm('color', x)}>{color}</TextInput>
+        <View style={{flexDirection: 'row', marginHorizontal: 8, paddingHorizontal: 30,marginVertical: 10,  alignItems: 'center', justifyContent: 'space-between'}}>
+          <Text>Lengan Pendek</Text>
+          <Switch
+          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={isEnabled}
+          />
+         <Text>Lengan Panjang</Text>
+        </View>
         <NumberInput step={1} label="M" onChange={(a)=>setForm('size_m', a)} value={size ? size.m : 0}/>
         <NumberInput step={1} label="L" onChange={(a)=>setForm('size_l', a)} value={size ? size.l : 0}/>
         <NumberInput step={1} label="XL" onChange={(a)=>setForm('size_xl', a)} value={size ? size.xl : 0}/>

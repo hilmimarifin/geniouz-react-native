@@ -1,13 +1,13 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import {View, Image, FlatList, TouchableOpacity} from 'react-native';
+import {View, Image, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import Container from '../../components/Container';
 import Text from '../../components/Text';
 import {Colors} from '../../theme';
 import axios from 'axios';
 import Loading from '../../components/Loading';
 import TextInput from '../../components/TextInput';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
 import Button from '../../components/Button';
 import useForm from '../../hooks/useForm';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,10 +27,20 @@ import CategoriesField from './categories';
 import Header from '../../components/header';
 import BrandsField from './brand';
 
+
 const Product = ({route}) => {
   const dispatch = useDispatch();
   const k = useSelector(state => state.detailProductReducer);
-  const [form, setForm] = useForm(route.params ? {...k, categories: k.categories.map(i => i.id), brand: k.brand.id} : {categories: [], brand: '611a219a78c39b001687a9c7'});
+  const [form, setForm] = useForm(route.params ? {...k, categories: k.categories.map(i => i.id), brand: k.brand.id} : {
+    variants: [],
+    images: [],
+    name: '',
+    description: '',
+    purchasePrice: 0,
+    salePrice: 0,
+    shopeeUrl: '',
+    tokpedUrl:'',
+    categories: [], brand: '611a219a78c39b001687a9c7'});
   const {navigate, goBack} = useNavigation();
   const token = useSelector(state => state.authReducer.token);
   const categories = useSelector(state => state.categoriesReducer);
@@ -39,14 +49,19 @@ const Product = ({route}) => {
   const [imageSource, setImageSource] = useState(null);
   const [imageName, setImageName] = useState(null);
   const [imageType, setImageType] = useState(null);
-  console.log('form', form.brand)
-  const {id} = route.params || {};
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(editProduct(form));
+    },[dispatch, editProduct, form])
+)
+  const {id, variantsData} = route.params || {};
 
    const selectCamera = () => {
     let options = {
       title: 'You can choose one image',
       maxWidth: 500,
       maxHeight: 500,
+      quality: 0.5,
       noData: true,
       mediaType: 'photo',
       storageOptions: {
@@ -55,11 +70,8 @@ const Product = ({route}) => {
     };
      launchCamera(options, response => {
         if (response.didCancel) {
-          console.log('User cancelled photo picker');
         } else if (response.error) {
-          console.log('ImagePicker Error: ', response.error);
         } else if (response.customButton) {
-          console.log('User tapped custom button: ', response.customButton);
         } else {
           let source = { uri: response.assets[0].uri, type: response.assets[0].type, name: response.assets[0].fileName, base64: response.assets[0].base64 };
           // ADD THIS
@@ -101,7 +113,27 @@ const Product = ({route}) => {
 
 
   const saveData = () =>{
-    dispatch(editProduct(form));
+    const generatecode = (brand, category) => {
+      console.log('brand value', brand)
+     const a =  Math.floor(Math.random()*10000)
+     const b = String(a)
+     const brandProduct = brand === "61188217dca90d4eed10ef40" ? 'GN' : 'NG'
+     const cat = () => {
+        //polos
+        if (category.includes("60d420e11aba98554466096f")){ return '01' }
+        //flannel
+        else if(category.includes("60d421dc1aba985544660970")){ return '02'}
+        //kaos
+        else if(category.includes("610dbb43066091001507a345")){ return '03'}
+        //baju muslim
+        else if(category.includes("6112bf20d5429f00153e4d18")){ return '04'}
+        //dll
+        else { return '05'}
+     }
+     return brandProduct + cat() + b
+    }
+    const code = generatecode(form.brand, form.categories)
+    console.log('code value',code)
     const data = {...k, ...form};
     const fileData = {
       name: 'files.images',
@@ -111,9 +143,8 @@ const Product = ({route}) => {
     };
     const productData = {
       name: 'data',
-      data: JSON.stringify(data),
+      data: JSON.stringify({...data, code: code}),
     };
-    console.log('data', data)
     if (id)
         {
          axios.put(`https://geniouz-strapi.herokuapp.com/products/${id}`, data,
@@ -213,26 +244,44 @@ const Product = ({route}) => {
         <NumberInput step={5000} label="Harga Beli" onChange={(a)=>setForm('purchasePrice', a)} value={form.purchasePrice}/>
         <NumberInput step={5000} label="Harga Jual" onChange={(a)=>setForm('salePrice', a)} value={form.salePrice}/>
 
-        <Text>Varian :</Text>
+        <Text style={{marginHorizontal: 8, marginVertical: 8}}>Varian :</Text>
+        <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Pendek :</Text>
         { id ? form.variants.map((items, index) =>
-          <TouchableOpacity
-            key={index}
-            onPress={()=>navigate('variantStack', {screen: 'variants', params: {index: index, id: items.id, sleeve: items.sleeve, color: items.color, size: items.size}}
-               )}
-            style={{
-              marginHorizontal: 8,
-              marginVertical: 8,
-              borderWidth: 1,
-              borderColor: `${Colors.lightGrey}`,
-              paddingHorizontal: 8,
-              paddingVertical: 8,
-              borderRadius: 10}}
-          >
-              <Text >
-                {items.color}
-              </Text>
-          </TouchableOpacity>) : null}
-        <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> navigate('variantStack', {screen: 'variants'})}/>
+          { if (!items.longSleeve) {
+                return <TouchableOpacity
+                  key={index}
+                  onPress={()=>navigate('variantStack', {screen: 'variants', params: {productId: id, index: index, id: items.id, longSleeve: items.longSleeve, color: items.color, size: items.size}}
+                    )}                
+                >   
+                    <Text style={style.variantsContainer} >
+                      {items.color}
+                    </Text>
+                </TouchableOpacity> 
+              } 
+              
+            }
+          )
+          : null}
+
+        <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Panjang :</Text>
+        { id ? form.variants.map((items, index) =>
+          { if (items.longSleeve) {
+                return <TouchableOpacity
+                  key={index}
+                  onPress={()=>navigate('variantStack', {screen: 'variants', params: {productId: id, index: index, id: items.id, longSleeve: items.longSleeve, color: items.color, size: items.size}}
+                    )}      
+                >   
+                    <Text style={style.variantsContainer} >
+                      {items.color}
+                    </Text>
+                </TouchableOpacity> 
+              } 
+              
+            }
+          )
+          : null}
+
+        <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> navigate('variantStack', {screen: 'variants', params: {productId: id }})}/>
         {id ? <Button text="Hapus" color={Colors.red} onPress={deleteData}/> : null}
         <Button text="Simpan" onPress={saveData}/>
       </View>
@@ -241,4 +290,15 @@ const Product = ({route}) => {
   );
 };
 
+const style = StyleSheet.create({
+  variantsContainer: {
+    marginHorizontal: 8,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: `${Colors.lightGrey}`,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 10
+  }
+})
 export default Product;

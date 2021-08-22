@@ -41,3 +41,10 @@ export const addCategory = data => {
   };
 };
 
+export const clearDetailProduct = data => {
+  return {
+    type: 'CLEAR_PRODUCT',
+    payload: data,
+  };
+};
+

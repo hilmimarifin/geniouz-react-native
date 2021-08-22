@@ -9,7 +9,7 @@ const HeaderAdd = ({page}) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigate(page)}>
+      <TouchableOpacity onPress={() => {navigate(page)}}>
         <Icon large name="plus" />
       </TouchableOpacity>
     </View>

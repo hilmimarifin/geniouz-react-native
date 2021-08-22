@@ -11,7 +11,17 @@ export const productsReducer = (state = INITIAL_STATE, {type, payload}) => {
   }
 };
 
-const detailProduct = {variants: []};
+const detailProduct = {
+  variants: [],
+  name: '',
+  description: '',
+  purchasePrice: 0,
+  salePrice: 0,
+  shopeeUrl: '',
+  tokpedUrl:'',
+  brand: '',
+  categories: []
+};
 export const detailProductReducer =  (state = detailProduct, {type, payload}) => {
   switch (type) {
     case 'GET_DETAIL_PRODUCT':
@@ -28,6 +38,9 @@ export const detailProductReducer =  (state = detailProduct, {type, payload}) =>
       return state;
     case 'ADD_CATEGORY':
       state.categories = payload;
+      return state;
+    case 'CLEAR_PRODUCT':
+      state = detailProduct;
       return state;
     default:
       return state;
