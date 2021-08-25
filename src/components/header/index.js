@@ -2,7 +2,7 @@
 import React from 'react';
 import {View, Platform, StyleSheet} from 'react-native';
 import PropTypes from 'prop-types';
-import {withTheme} from '../../theme';
+import {Colors, withTheme} from '../../theme';
 import Text from '../Text';
 import HeaderBack from './HeaderBack';
 import HeaderAdd from './HeaderAdd';
@@ -33,11 +33,13 @@ const styles = StyleSheet.create({
   headerContainer: {
     ...Platform.select({
       android: {
-        marginHorizontal: 16,
+        marginHorizontal: 0,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 10,
+        paddingVertical: 15,
+        borderBottomColor: Colors.white,
+        borderBottomWidth: 1,
       },
     }),
   },

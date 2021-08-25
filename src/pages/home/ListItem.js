@@ -25,6 +25,17 @@ const ListItem = ({product}) => {
     return value;
   };
   const productStock = sum(stock);
+  const getColor = () =>{
+    let colors = []
+    for(let i = 0; i<variants.length; i++){
+      if(!colors.includes(variants[i].color)){
+        colors.push(variants[i].color)
+      }
+    }
+    return colors
+  }
+  const colour = getColor();
+  const colours = colour.map(i => {return (`${i}, `)})
   return (
     <View style={{marginTop: 20}}>
       <TouchableOpacity
@@ -36,7 +47,7 @@ const ListItem = ({product}) => {
             {name}
           </Text>
           <Text small>{code}</Text>
-          <Text small>{salePrice}</Text>
+          <Text small>{colours}</Text>
           <Text small>{productStock} pcs</Text>
 
         </View>

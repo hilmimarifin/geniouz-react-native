@@ -10,7 +10,7 @@ const NumberInput = ({label, ...props}) => {
 
   return (
     <View style={container}>
-      <Text small style={{paddingHorizontal: 4}}>
+      <Text small style={{paddingHorizontal: 8}}>
         {label}
       </Text>
       <NumericInput
@@ -25,6 +25,7 @@ const NumberInput = ({label, ...props}) => {
         upDownButtonsBackgroundColor='black'
         iconStyle={{color: Colors.white, borderBottomColor: Colors.white}}
         borderColor='black'
+        minValue={0}
         {...props}
       />
     </View>
@@ -33,17 +34,21 @@ const NumberInput = ({label, ...props}) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 8,
+    marginLeft: 4,
+    paddingVertical: 5,
     marginVertical: 2,
     // paddingHorizontal: 8,
-    width: '100%',
+    width: '98%',
     borderBottomColor: Colors.white
   },
   textInputStyle: {
+    textAlign: 'left',
     color: Colors.lightGrey,
     fontSize: 20,
+    width: '90%',
+    paddingLeft: 2,
+    paddingRight: 0,
     // borderColor: 'red',
-    // paddingHorizontal: 0,
     // borderWidth: 1
 
   },

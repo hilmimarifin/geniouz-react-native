@@ -11,21 +11,23 @@ import { addCategory } from '../../redux/actions/products-action';
 
 const CategoriesField = ({categories, formCategories, id, onChangeValue}) => {
     const detailProduct = useSelector(state => state.detailProductReducer)
-    const [value, setValue] = useState(formCategories? formCategories : [] )
+    const [value, setValue] = useState(formCategories )
     const dispatch = useDispatch();
     const productCategories = detailProduct.categories
     const ids = formCategories? formCategories : []
     const handleChange = (id) => {
       
       if (value.includes(id)){ 
-         onChangeValue(value.splice(value.indexOf(id),1))
+         value.splice(value.indexOf(id),1)
         }
-      else { onChangeValue(value.push(id))}
-      dispatch(addCategory(value))
+      else { value.push(id)}
     };
     return (
     <View>
       <Modal
+        cancelButton
+        acceptButton
+        onAccept={()=>onChangeValue(value)}
         showComponent={
           <View
             style={{

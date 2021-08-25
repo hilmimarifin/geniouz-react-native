@@ -14,6 +14,7 @@ import ListItem from './ListItem';
 import { get_categories } from '../../redux/actions/categories-action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { get_brands } from '../../redux/actions/brands-action';
+import SearchBar from './SearchBar';
 
 
 const Home = () => {
@@ -22,7 +23,7 @@ const Home = () => {
   const isFocused = useIsFocused();
   useFocusEffect(
       React.useCallback(() => {
-        axios.get('https://geniouz-strapi.herokuapp.com/products')
+        axios.get('https://geniouz-strapi.herokuapp.com/products?_sort=createdAt:DESC')
           .then(data => {
             dispatch(get_products(data.data));
             setLoading(false);
@@ -51,9 +52,11 @@ const Home = () => {
   const data = useSelector(state => state.productsReducer);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchValue, setSearchValue] = useState('')
+  const dataShow = searchValue ? data.filter(i => i.code.includes(searchValue.toUpperCase()) || i.name.toUpperCase().includes(searchValue.toUpperCase())) : data;
   const onRefresh = () => {
     setRefreshing(true);
-    axios.get('https://geniouz-strapi.herokuapp.com/products')
+    axios.get('https://geniouz-strapi.herokuapp.com/products?_sort=createdAt:DESC')
       .then(data => {
         dispatch(get_products(data.data));
         // setData(data.data);
@@ -83,13 +86,12 @@ const Home = () => {
     <Container refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={refreshing}/>}>
      
       <Header title="Home" addButton="product"/>
+      <SearchBar onChangeValue={(a)=> setSearchValue(a)}/>
       {loading ? <Loading/>:
         <View style={style.container}>
-          {data.map(item => {return <ListItem key={item.id} product={item}/>})}
-          {/* <FlatList
-            data={data}
-            renderItem={({item}) => <ListItem product = {item}/>}
-          /> */}
+          {dataShow.length !== 0 ? dataShow.map(item => {return <ListItem key={item.id} product={item}/>})
+            : <Text>Produk tidak ditemukan</Text>
+          }
         </View>
       }
     </Container>

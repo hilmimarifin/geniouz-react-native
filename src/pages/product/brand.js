@@ -22,7 +22,8 @@ const BrandsField = ({brandsData, formBrands, onChangeValue}) => {
     const k = radioButtons.find(i => i.selected === true)
     return (
     <View>
-              <Modal
+      <Modal
+        acceptButton
         showComponent={
           <View
             style={{

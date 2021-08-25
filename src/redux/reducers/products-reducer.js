@@ -33,6 +33,11 @@ export const detailProductReducer =  (state = detailProduct, {type, payload}) =>
     case 'EDIT_VARIANT':
       state.variants[payload.index] = payload.variants;
       return state;
+    case 'DELETE_VARIANT':
+      state.variants.splice(state.variants.indexOf(payload),1)
+      console.log('nilai hasil filter', state.variants)
+
+      return state;   
     case 'EDIT_PRODUCT':
       state = {...state, ...payload};
       return state;

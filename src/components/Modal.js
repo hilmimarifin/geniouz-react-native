@@ -1,12 +1,16 @@
 /* eslint-disable prettier/prettier */
 import React, {useState} from 'react';
-import {Alert, Modal as RNModal, StyleSheet, Text, Pressable, View} from 'react-native';
+import {Alert, Modal as RNModal, StyleSheet, Text, Pressable, View, TouchableOpacity} from 'react-native';
 
-const Modal = ({showComponent,modalComponent,  children, acceptButton, ...props}) => {
+const Modal = ({showComponent,modalComponent, onAccept, onCancel,  children, cancelButton, acceptButton, ...props}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const handleAccept = () => {
-    acceptButton
-    setModalVisible(!modalVisible)
+    setModalVisible(!modalVisible);
+    onAccept? onAccept() : null
+  }
+  const handleCancel= () => {
+    setModalVisible(!modalVisible);
+    onCancel? onCancel() : null;
   }
   return (
     <View >
@@ -25,19 +29,21 @@ const Modal = ({showComponent,modalComponent,  children, acceptButton, ...props}
             {modalComponent}
             <View style={{flexDirection: 'row'}}>
               {acceptButton ? 
-              <Pressable
+              <TouchableOpacity
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => handleAccept()}
               >
-                <Text style={styles.textStyle}>accept</Text>
-              </Pressable> : null
+                <Text style={styles.textStyle}>Okaaay</Text>
+              </TouchableOpacity> : null
               }
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}
-              >
-                <Text style={styles.textStyle}>cancel</Text>
-              </Pressable>
+              {cancelButton ? 
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => handleCancel()}
+                >
+                  <Text style={styles.textStyle}>Gak jadi</Text>
+                </Pressable> : null
+              }
             </View>
 
           </View>

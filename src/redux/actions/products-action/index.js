@@ -27,6 +27,14 @@ export const editVariant = data => {
   };
 };
 
+export const deleteVariant = data => {
+  return {
+    type: 'DELETE_VARIANT',
+    payload: data,
+  };
+};
+
+
 export const getDetailProduct = data => {
   return {
     type: 'GET_DETAIL_PRODUCT',

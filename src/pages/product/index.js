@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import {View, Image, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Image, FlatList, TouchableOpacity, StyleSheet, Pressable} from 'react-native';
 import Container from '../../components/Container';
 import Text from '../../components/Text';
 import {Colors} from '../../theme';
@@ -26,6 +26,7 @@ import CheckBox from '@react-native-community/checkbox';
 import CategoriesField from './categories';
 import Header from '../../components/header';
 import BrandsField from './brand';
+import DeleteButton from '../../components/DeleteButton';
 
 
 const Product = ({route}) => {
@@ -49,6 +50,7 @@ const Product = ({route}) => {
   const [imageSource, setImageSource] = useState(null);
   const [imageName, setImageName] = useState(null);
   const [imageType, setImageType] = useState(null);
+  const [loading, setLoading] = useState(false);
   useFocusEffect(
     React.useCallback(() => {
       dispatch(editProduct(form));
@@ -61,7 +63,7 @@ const Product = ({route}) => {
       title: 'You can choose one image',
       maxWidth: 500,
       maxHeight: 500,
-      quality: 0.5,
+      quality: 0.8,
       noData: true,
       mediaType: 'photo',
       storageOptions: {
@@ -85,8 +87,9 @@ const Product = ({route}) => {
    const selectGallery = () => {
         let options = {
           title: 'You can choose one image',
-          maxWidth: 256,
-          maxHeight: 256,
+          maxWidth: 500,
+          maxHeight: 500,
+          quality: 0.8,
           noData: true,
           mediaType: 'photo',
           storageOptions: {
@@ -113,10 +116,16 @@ const Product = ({route}) => {
 
 
   const saveData = () =>{
+    setLoading(true)
     const generatecode = (brand, category) => {
-      console.log('brand value', brand)
-     const a =  Math.floor(Math.random()*10000)
+     const a =  Math.floor(Math.random()*1000)
      const b = String(a)
+     const addZero = () => {
+       if(b.length === 1){ return `00${b}`}
+       else if (b.length ===2){return `0${b}`}
+       else {return b}
+     }
+     const c = addZero()
      const brandProduct = brand === "61188217dca90d4eed10ef40" ? 'GN' : 'NG'
      const cat = () => {
         //polos
@@ -130,10 +139,9 @@ const Product = ({route}) => {
         //dll
         else { return '05'}
      }
-     return brandProduct + cat() + b
+     return brandProduct + cat() + c
     }
     const code = generatecode(form.brand, form.categories)
-    console.log('code value',code)
     const data = {...k, ...form};
     const fileData = {
       name: 'files.images',
@@ -151,15 +159,18 @@ const Product = ({route}) => {
           { 'Content-Type': 'multipart/form-data', headers: { Authorization: `Bearer ${token}` }})
           .then(response => { 
             showMessage({message: 'edit success', type: 'success'});
-            dispatch(reactor);})
+            dispatch(reactor);
+            imageSource ?
+              RNFetchBlob.fetch('POST', 'https://geniouz-strapi.herokuapp.com/upload',  {
+              'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`,
+              }, [{name: 'files', filename: imageName, type: imageType, data: imgBlob}, {name: 'ref', data: 'products'}, {name: 'refId', data: id}, {name: 'field', data: 'images'}])
+              .then(res => {showMessage({message: 'upload success', type: 'success'});
+                 goBack();
+              })
+              .catch(res => {showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)})
+            : goBack();
+          })
           .catch(err => {showMessage({message: 'edit failed', type: 'danger'});});
-          imageSource ? RNFetchBlob.fetch('POST', 'https://geniouz-strapi.herokuapp.com/upload',  {
-            'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`,
-          }, [{name: 'files', filename: imageName, type: imageType, data: imgBlob}, {name: 'ref', data: 'products'}, {name: 'refId', data: id}, {name: 'field', data: 'images'}]).then(res => {showMessage({message: 'upload success', type: 'success'});
-          goBack();
-        })
-        .catch(res => {showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)})
-         : null;
         } else {
           RNFetchBlob.fetch('POST', 'https://geniouz-strapi.herokuapp.com/products', {
             'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`,
@@ -170,15 +181,16 @@ const Product = ({route}) => {
           .then(res =>
                         {
                             showMessage({message: 'success add data', type: 'success'});
+                            goBack();
                         }
             )
             .catch(res => {showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)});
-
         };
         dispatch(reactor());
   };
 
   const deleteData = () => {
+    setLoading(true);
     axios.delete(`https://geniouz-strapi.herokuapp.com/products/${id}`,
           { 'Content-Type': 'multipart/form-data', headers: { Authorization: `Bearer ${token}` }}).then(res => {
             showMessage({message: 'produk telah dihapus', type: 'success'});
@@ -190,22 +202,23 @@ const Product = ({route}) => {
   return (
     <Container>
       {/* {loading ? <Loading /> : */}
-      <Header title="Product"/>
+      <Header title={id? form.name : `Add Product`}/>
       <View>
           <FlatList
             data={form.images}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) =>
-            <TouchableOpacity onPress={()=>navigate('photo', {url: item.url})}>
-              <Image source={{uri: `${item.url}`}} style={{width: 150, height: 200, borderRadius: 10}}/>
-            </TouchableOpacity>
+            <Pressable onPress={()=>navigate('photo', {url: item.url})} >
+              <Image source={{uri: `${item.url}`}} style={{marginTop: 20, width: 150, height: 200, borderRadius: 10}}/>
+            </Pressable>
             }
             ItemSeparatorComponent={() => <View style={{ marginEnd: 20 }} />}
           />
         <View style={{paddingVertical: 20}}>
           {!imageSource ?
-            <Modal 
+            <Modal
+            cancelButton 
             showComponent={
               <View
               style={
@@ -241,7 +254,7 @@ const Product = ({route}) => {
         <CategoriesField onChangeValue={()=>{setForm()}} categories={categories} formCategories={form.categories} id={id}/>
         <TextInput  label="Shopee URL" onChangeText={(a)=>setForm('shopeeUrl', a)}>{form.shopeeUrl}</TextInput>
         <TextInput label="Tokped URL" onChangeText={(a)=>setForm('tokpedUrl', a)} >{form.tokpedUrl}</TextInput>
-        <NumberInput step={5000} label="Harga Beli" onChange={(a)=>setForm('purchasePrice', a)} value={form.purchasePrice}/>
+        <NumberInput step={5000} label="Harga Modal" onChange={(a)=>setForm('purchasePrice', a)} value={form.purchasePrice}/>
         <NumberInput step={5000} label="Harga Jual" onChange={(a)=>setForm('salePrice', a)} value={form.salePrice}/>
 
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Varian :</Text>
@@ -282,8 +295,8 @@ const Product = ({route}) => {
           : null}
 
         <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> navigate('variantStack', {screen: 'variants', params: {productId: id }})}/>
-        {id ? <Button text="Hapus" color={Colors.red} onPress={deleteData}/> : null}
-        <Button text="Simpan" onPress={saveData}/>
+        {id ? <DeleteButton loading={loading} text="Hapus" color={Colors.red} cancelButton onPress={deleteData}/> : null}
+        <Button text="Simpan" onPress={saveData} loading={loading}/>
       </View>
       {/* } */}
     </Container>

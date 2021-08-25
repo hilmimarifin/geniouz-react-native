@@ -35,7 +35,7 @@ const MainTab = () => (
     <Tab.Screen
       name="Home"
       component={HomeStack}
-        options={{ tabBarIcon: getTabIcon('home') }}
+        options={{ tabBarIcon: getTabIcon('home')}}
     />
      <Tab.Screen
       name="Statistic"
