@@ -19,7 +19,6 @@ const Modal = ({showComponent,modalComponent, onAccept, onCancel,  children, can
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
           setModalVisible(!modalVisible);
         }}
         {...props}

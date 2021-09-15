@@ -18,7 +18,8 @@ const getTabIcon = (name) => ({ color }) => <Icon name={name} color={color} />;
 
 const MainTab = () => (
   <Tab.Navigator
-    initialRouteName="homeStack"
+    initialRouteName="Home"
+    backBehavior="initialRoute"
     tabBarOptions={{
       showLabel: false,
       tabStyle: {

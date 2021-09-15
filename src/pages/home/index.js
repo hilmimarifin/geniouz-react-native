@@ -21,36 +21,30 @@ const Home = () => {
   const [reactor, setReactor] = useState(useSelector(state =>state.reactorReducer));
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(true);
   useFocusEffect(
       React.useCallback(() => {
         axios.get('https://geniouz-strapi.herokuapp.com/products?_sort=createdAt:DESC')
-          .then(data => {
-            dispatch(get_products(data.data));
-            setLoading(false);
-            setReactor(reactor)
-          })
-          .catch(err => {console.log(err);});
-        axios.get('https://geniouz-strapi.herokuapp.com/categories')
+        .then(data => {
+          dispatch(get_products(data.data));
+          axios.get('https://geniouz-strapi.herokuapp.com/categories')
           .then(data => {
             dispatch(get_categories(data.data));
-            setLoading(false);
-            setReactor(reactor)
+            axios.get('https://geniouz-strapi.herokuapp.com/brands')
+            .then(data => {
+              dispatch(get_brands(data.data))
+              setLoading(false);
+              })
+            .catch(err => {console.log(err);});    
             })
           .catch(err => {console.log(err);});
-        axios.get('https://geniouz-strapi.herokuapp.com/brands')
-          .then(data => {
-            dispatch(get_brands(data.data))
-    
-            setLoading(false);
-            setReactor(reactor)
-            })
-          .catch(err => {console.log(err);});
+        })
+        .catch(err => {console.log(err);});
         dispatch(clearDetailProduct())
     
       },[reactor,axios,dispatch,data])
   )
   const data = useSelector(state => state.productsReducer);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchValue, setSearchValue] = useState('')
   const dataShow = searchValue ? data.filter(i => i.code.includes(searchValue.toUpperCase()) || i.name.toUpperCase().includes(searchValue.toUpperCase())) : data;

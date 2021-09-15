@@ -12,7 +12,7 @@ const Stack = createStackNavigator();
 const CategoryStack = () => (
   <Stack.Navigator initialRouteName="category" headerMode="none">
     <Stack.Screen name="category" component={Category} />
-    <Stack.Screen name="categoryDetail" component={DetailCategory} />
+    {/* <Stack.Screen name="categoryDetail" component={DetailCategory} /> */}
   </Stack.Navigator>
 );
 

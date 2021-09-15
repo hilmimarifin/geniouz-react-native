@@ -13,10 +13,12 @@ export const productsReducer = (state = INITIAL_STATE, {type, payload}) => {
 
 const detailProduct = {
   variants: [],
+  images: [],
   name: '',
   description: '',
   purchasePrice: 0,
   salePrice: 0,
+  material: '',
   shopeeUrl: '',
   tokpedUrl:'',
   brand: '',
