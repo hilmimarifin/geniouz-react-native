@@ -1,13 +1,13 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import {View, Image, FlatList, TouchableOpacity, StyleSheet, Pressable} from 'react-native';
+import {View, Image, FlatList, TouchableOpacity, StyleSheet, Pressable, Alert} from 'react-native';
 import Container from '../../components/Container';
 import Text from '../../components/Text';
 import {Colors} from '../../theme';
 import axios from 'axios';
 import Loading from '../../components/Loading';
 import TextInput from '../../components/TextInput';
-import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
+import { StackActions, useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
 import Button from '../../components/Button';
 import useForm from '../../hooks/useForm';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,22 +27,16 @@ import CategoriesField from './categories';
 import Header from '../../components/header';
 import BrandsField from './brand';
 import DeleteButton from '../../components/DeleteButton';
+import { resolvePreset } from '@babel/core';
+import ImageList from './imageList';
 
 
 const Product = ({route}) => {
-  const dispatch = useDispatch();
+  const dispatchRedux = useDispatch();
   const k = useSelector(state => state.detailProductReducer);
   const [form, setForm] = useForm(route.params ? {...k, categories: k.categories.map(i => i.id), brand: k.brand.id} : {
-    variants: [],
-    images: [],
-    name: '',
-    description: '',
-    purchasePrice: 0,
-    salePrice: 0,
-    shopeeUrl: '',
-    tokpedUrl:'',
-    categories: [], brand: '611a219a78c39b001687a9c7'});
-  const {navigate, goBack} = useNavigation();
+    ...k, variants: [] , brand: '611a219a78c39b001687a9c7'});
+  const {navigate, goBack, addListener, dispatch, reset} = useNavigation();
   const token = useSelector(state => state.authReducer.token);
   const categories = useSelector(state => state.categoriesReducer);
   const brands = useSelector(state => state.brandsReducer);
@@ -51,11 +45,43 @@ const Product = ({route}) => {
   const [imageName, setImageName] = useState(null);
   const [imageType, setImageType] = useState(null);
   const [loading, setLoading] = useState(false);
+
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(editProduct(form));
-    },[dispatch, editProduct, form])
-)
+      dispatchRedux(editProduct(form));
+    },[dispatchRedux, editProduct, form])
+  )
+  // useEffect(
+  //   () =>
+  //     addListener('beforeRemove', (e) => {
+  //       if (hasUnsavedChanges) {
+  //         // If we don't have unsaved changes, then we don't need to do anything
+  //         return;
+  //       }
+
+  //       // Prevent default behavior of leaving the screen
+  //       e.preventDefault();
+
+  //       // Prompt the user before leaving the screen
+  //       Alert.alert(
+  //         'Yakin mau keluar?',
+  //         'Terdapat perubahan yang belum disimpan',
+  //         [
+  //           { text: "Batal", style: 'cancel', onPress: () => {} },
+  //           {
+  //             text: 'Keluar',
+  //             style: 'destructive',
+  //             // If the user confirmed, then we dispatch the action we blocked earlier
+  //             // This will continue the action that had triggered the removal of the screen
+  //             onPress: () => dispatch(e.data.action),
+  //           },
+  //         ]
+  //       );
+  //     }),
+  //   [addListener,dispatch, hasUnsavedChanges]
+  // );
+  const initialForm = {...k, categories: k.categories.map(i => i.id), brand: k.brand.id};
+  const hasUnsavedChanges = initialForm === form;
   const {id, variantsData} = route.params || {};
 
    const selectCamera = () => {
@@ -126,18 +152,29 @@ const Product = ({route}) => {
        else {return b}
      }
      const c = addZero()
-     const brandProduct = brand === "61188217dca90d4eed10ef40" ? 'GN' : 'NG'
+     const brandProduct = brand === "61188217dca90d4eed10ef40" ? 'G' : 'N'
      const cat = () => {
-        //polos
-        if (category.includes("60d420e11aba98554466096f")){ return '01' }
-        //flannel
-        else if(category.includes("60d421dc1aba985544660970")){ return '02'}
+        //Kemeja polos
+        if (category.includes("612836fd17bed300163f4464")){ return '01' }
+        //Kemeja flannel
+        else if(category.includes("612839e417bed300163f4465")){ return '02'}
+        //kemeja motif
+        else if(category.includes("612839ef17bed300163f4466")){ return '03'}
+        //kemeja Batik
+        else if(category.includes("612839f917bed300163f4467")){ return '04'}
+        //Kemeja Denim
+        else if(category.includes("61283a3217bed300163f4468")){ return '05'}
+        //Kemeja Formal
+        else if(category.includes("61283a7417bed300163f4469")){ return '06'}
+
         //kaos
-        else if(category.includes("610dbb43066091001507a345")){ return '03'}
+        else if(category.includes("612834fe17bed300163f4461")){ return '10'}
         //baju muslim
-        else if(category.includes("6112bf20d5429f00153e4d18")){ return '04'}
+        else if(category.includes("6128351f17bed300163f4463")){ return '20'}
+        //jaket
+        else if(category.includes("6128350e17bed300163f4462")){ return '30'}
         //dll
-        else { return '05'}
+        else { return '90'}
      }
      return brandProduct + cat() + c
     }
@@ -159,18 +196,23 @@ const Product = ({route}) => {
           { 'Content-Type': 'multipart/form-data', headers: { Authorization: `Bearer ${token}` }})
           .then(response => { 
             showMessage({message: 'edit success', type: 'success'});
-            dispatch(reactor);
+            dispatchRedux(reactor);
             imageSource ?
               RNFetchBlob.fetch('POST', 'https://geniouz-strapi.herokuapp.com/upload',  {
               'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`,
               }, [{name: 'files', filename: imageName, type: imageType, data: imgBlob}, {name: 'ref', data: 'products'}, {name: 'refId', data: id}, {name: 'field', data: 'images'}])
               .then(res => {showMessage({message: 'upload success', type: 'success'});
-                 goBack();
+                //  navigate('home');
+                //  dispatch(StackActions.replace('maintab'))
+                reset({index: 1, routes: [{name: 'maintab'}]})
+
               })
-              .catch(res => {showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)})
-            : goBack();
+              .catch(res => {setLoading(false);showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)})
+             :  
+                // dispatch(StackActions.replace('maintab'))
+                reset({index: 1, routes: [{name: 'maintab'}]})
           })
-          .catch(err => {showMessage({message: 'edit failed', type: 'danger'});});
+          .catch(err => {setLoading(false); showMessage({message: 'edit failed', type: 'danger'});});
         } else {
           RNFetchBlob.fetch('POST', 'https://geniouz-strapi.herokuapp.com/products', {
             'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`,
@@ -181,12 +223,12 @@ const Product = ({route}) => {
           .then(res =>
                         {
                             showMessage({message: 'success add data', type: 'success'});
-                            goBack();
+                            reset({index: 1, routes: [{name: 'maintab'}]})
                         }
             )
-            .catch(res => {showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)});
+            .catch(res => {setLoading(false); showMessage({message: 'upload failed', type: 'danger'}); console.log('upload error', res)});
         };
-        dispatch(reactor());
+        dispatchRedux(reactor());
   };
 
   const deleteData = () => {
@@ -194,7 +236,7 @@ const Product = ({route}) => {
     axios.delete(`https://geniouz-strapi.herokuapp.com/products/${id}`,
           { 'Content-Type': 'multipart/form-data', headers: { Authorization: `Bearer ${token}` }}).then(res => {
             showMessage({message: 'produk telah dihapus', type: 'success'});
-            goBack();
+            reset({index: 1, routes: [{name: 'maintab'}]})
           })
           .catch(res => {showMessage({message: 'Gagal menghapus', type: 'danger'}); console.log('upload error', res)});
 
@@ -204,17 +246,7 @@ const Product = ({route}) => {
       {/* {loading ? <Loading /> : */}
       <Header title={id? form.name : `Add Product`}/>
       <View>
-          <FlatList
-            data={form.images}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({item}) =>
-            <Pressable onPress={()=>navigate('photo', {url: item.url})} >
-              <Image source={{uri: `${item.url}`}} style={{marginTop: 20, width: 150, height: 200, borderRadius: 10}}/>
-            </Pressable>
-            }
-            ItemSeparatorComponent={() => <View style={{ marginEnd: 20 }} />}
-          />
+        <ImageList data= {form.images} onChangeValue={(a) => setForm('images', a)}/>
         <View style={{paddingVertical: 20}}>
           {!imageSource ?
             <Modal
@@ -240,8 +272,8 @@ const Product = ({route}) => {
             }
             modalComponent={
               <View>
-                <TouchableOpacity onPress={selectCamera}><Text>From Camera</Text></TouchableOpacity>
-                <TouchableOpacity onPress={selectGallery}><Text>From Gallery</Text></TouchableOpacity>
+                <TouchableOpacity style={{marginBottom: 10}} onPress={selectCamera}><Text>From Camera</Text></TouchableOpacity>
+                <TouchableOpacity style={{marginBottom: 10}} onPress={selectGallery}><Text>From Gallery</Text></TouchableOpacity>
               </View>
             }
             />
@@ -252,6 +284,7 @@ const Product = ({route}) => {
         <TextInput label="Nama" onChangeText={(a)=>setForm('name', a)} >{form.name}</TextInput>
         <BrandsField brandsData={brands} formBrands={form.brand} onChangeValue={a => setForm('brand', a)}/>
         <CategoriesField onChangeValue={()=>{setForm()}} categories={categories} formCategories={form.categories} id={id}/>
+        <TextInput  label="Bahan" onChangeText={(a)=>setForm('material', a)}>{form.material}</TextInput>
         <TextInput  label="Shopee URL" onChangeText={(a)=>setForm('shopeeUrl', a)}>{form.shopeeUrl}</TextInput>
         <TextInput label="Tokped URL" onChangeText={(a)=>setForm('tokpedUrl', a)} >{form.tokpedUrl}</TextInput>
         <NumberInput step={5000} label="Harga Modal" onChange={(a)=>setForm('purchasePrice', a)} value={form.purchasePrice}/>
@@ -259,7 +292,7 @@ const Product = ({route}) => {
 
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Varian :</Text>
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Pendek :</Text>
-        { id ? form.variants.map((items, index) =>
+        { form.variants.map((items, index) =>
           { if (!items.longSleeve) {
                 return <TouchableOpacity
                   key={index}
@@ -274,10 +307,10 @@ const Product = ({route}) => {
               
             }
           )
-          : null}
+        }
 
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Panjang :</Text>
-        { id ? form.variants.map((items, index) =>
+        {form.variants.map((items, index) =>
           { if (items.longSleeve) {
                 return <TouchableOpacity
                   key={index}
@@ -292,7 +325,7 @@ const Product = ({route}) => {
               
             }
           )
-          : null}
+        }
 
         <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> navigate('variantStack', {screen: 'variants', params: {productId: id }})}/>
         {id ? <DeleteButton loading={loading} text="Hapus" color={Colors.red} cancelButton onPress={deleteData}/> : null}

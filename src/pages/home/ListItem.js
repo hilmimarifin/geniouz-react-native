@@ -5,7 +5,7 @@ import Text from '../../components/Text';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { getDetailProduct } from '../../redux/actions/products-action';
-import PlaceHolder from '../../components/PlaceHolder';
+import img from '../../asset/images/icon.png'
 
 
 const ListItem = ({product}) => {
@@ -41,7 +41,7 @@ const ListItem = ({product}) => {
       <TouchableOpacity
         style={{flexDirection: 'row'}}
         onPress={handlePress}>
-        <Image source={images[0] ? {uri: images[0].url} : <PlaceHolder/>} style={{width: 90, height: 125, borderRadius: 5}} />
+        <Image source={images[0] ? {uri: images[0].url} : img} style={{width: 90, height: 125, borderRadius: 5}} />
         <View style={{marginHorizontal: 8}}>
           <Text small bold>
             {name}
