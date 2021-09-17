@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import {View, Image, FlatList, TouchableOpacity, StyleSheet, Pressable, Alert} from 'react-native';
+import {View, Image, FlatList, TouchableOpacity, StyleSheet, Pressable, Alert, Modal as RNModal} from 'react-native';
 import Container from '../../components/Container';
 import Text from '../../components/Text';
 import {Colors} from '../../theme';
@@ -29,6 +29,7 @@ import BrandsField from './brand';
 import DeleteButton from '../../components/DeleteButton';
 import { resolvePreset } from '@babel/core';
 import ImageList from './imageList';
+import Variants from './variants';
 
 
 const Product = ({route}) => {
@@ -45,6 +46,7 @@ const Product = ({route}) => {
   const [imageName, setImageName] = useState(null);
   const [imageType, setImageType] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [openVariants, setOpenVariants] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -294,15 +296,7 @@ const Product = ({route}) => {
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Pendek :</Text>
         { form.variants.map((items, index) =>
           { if (!items.longSleeve) {
-                return <TouchableOpacity
-                  key={index}
-                  onPress={()=>navigate('variantStack', {screen: 'variants', params: {productId: id, index: index, id: items.id, longSleeve: items.longSleeve, color: items.color, size: items.size}}
-                    )}                
-                >   
-                    <Text style={style.variantsContainer} >
-                      {items.color}
-                    </Text>
-                </TouchableOpacity> 
+                return <Variants key={index} items={items}/>
               } 
               
             }
@@ -312,26 +306,22 @@ const Product = ({route}) => {
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Panjang :</Text>
         {form.variants.map((items, index) =>
           { if (items.longSleeve) {
-                return <TouchableOpacity
-                  key={index}
-                  onPress={()=>navigate('variantStack', {screen: 'variants', params: {productId: id, index: index, id: items.id, longSleeve: items.longSleeve, color: items.color, size: items.size}}
-                    )}      
-                >   
-                    <Text style={style.variantsContainer} >
-                      {items.color}
-                    </Text>
-                </TouchableOpacity> 
+            return <Variants key={index} items={items} />
               } 
               
             }
           )
         }
 
-        <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> navigate('variantStack', {screen: 'variants', params: {productId: id }})}/>
+        <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> setOpenVariants(true)} />
         {id ? <DeleteButton loading={loading} text="Hapus" color={Colors.red} cancelButton onPress={deleteData}/> : null}
         <Button text="Simpan" onPress={saveData} loading={loading}/>
       </View>
-      {/* } */}
+      {/* <RNModal animationType="slide" visible={openVariants} onRequestClose={() => {
+          setOpenVariants(false);
+        }}>
+        <Variants dataVariant={form.variants[0]} />
+      </RNModal> */}
     </Container>
   );
 };
