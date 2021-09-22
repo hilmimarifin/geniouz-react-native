@@ -33,7 +33,7 @@ const ImageList = ({data, onChangeValue}) => {
                         }
                         acceptButton
                         cancelButton
-                        onAccept={(index)=> handleAccept(index)}
+                        onAccept={()=> handleAccept(index)}
                       />
               </ImageBackground>
             </TouchableOpacity>

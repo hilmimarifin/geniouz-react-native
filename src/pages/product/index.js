@@ -46,7 +46,8 @@ const Product = ({route}) => {
   const [imageName, setImageName] = useState(null);
   const [imageType, setImageType] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [openVariants, setOpenVariants] = useState(false);
+  const [openVariant, setOpenVariant] = useState({open: false});
+  const [addVariant, setAddVariant] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -142,6 +143,16 @@ const Product = ({route}) => {
           });
    };
 
+   const handleVariant = (indexV) =>{
+    setOpenVariant({open: true, index: indexV});
+   }
+
+   const handleNewVariant = () =>{
+    setAddVariant(true);
+
+   }
+
+   console.log('nilai variant', form.variants)
 
   const saveData = () =>{
     setLoading(true)
@@ -296,7 +307,17 @@ const Product = ({route}) => {
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Pendek :</Text>
         { form.variants.map((items, index) =>
           { if (!items.longSleeve) {
-                return <Variants key={index} items={items}/>
+                return <View key={index}>
+                            <TouchableOpacity
+                                        style={style.variantsContainer}
+                                        onPress={() => handleVariant(index)}                
+                                      >   
+                                          <Text>
+                                            {items.color}
+                                          </Text>
+                                          <Text>{items.size.m + items.size.l + items.size.xl + items.size.xxl}</Text>
+                            </TouchableOpacity> 
+                        </View>
               } 
               
             }
@@ -306,22 +327,37 @@ const Product = ({route}) => {
         <Text style={{marginHorizontal: 8, marginVertical: 8}}>Tangan Panjang :</Text>
         {form.variants.map((items, index) =>
           { if (items.longSleeve) {
-            return <Variants key={index} items={items} />
+            return <View key={index}>
+                            <TouchableOpacity
+                                        style={style.variantsContainer}
+                                        onPress={() => handleVariant(index)}                
+                                      >   
+                                          <Text>
+                                            {items.color}
+                                          </Text>
+                                          <Text>{items.size.m + items.size.l + items.size.xl + items.size.xxl}</Text>
+                            </TouchableOpacity> 
+                        </View>
               } 
               
             }
           )
         }
 
-        <Button color={Colors.lightGrey} text="Tambah Varian" onPress={()=> setOpenVariants(true)} />
+        <Button color={Colors.lightGrey} text="Tambah Varian" onPress={handleNewVariant} />
         {id ? <DeleteButton loading={loading} text="Hapus" color={Colors.red} cancelButton onPress={deleteData}/> : null}
         <Button text="Simpan" onPress={saveData} loading={loading}/>
       </View>
-      {/* <RNModal animationType="slide" visible={openVariants} onRequestClose={() => {
-          setOpenVariants(false);
-        }}>
-        <Variants dataVariant={form.variants[0]} />
-      </RNModal> */}
+      <Variants 
+        visible={openVariant.open}
+        setVisible={(a) => setOpenVariant({...openVariant, open: a})}
+        items={form.variants[openVariant.index]}
+        onChangeValue={(a) => form.variants[openVariant.index] = a}
+        onDelete={(a) => form.variants.splice(a,1)}
+        index={openVariant.index}
+        komponen= "Edit"
+      />
+      <Variants komponen="new" visible={addVariant} setVisible={(a) => setAddVariant(a)} onChangeValue={(a) => form.variants.push(a)}/>
     </Container>
   );
 };
@@ -334,7 +370,9 @@ const style = StyleSheet.create({
     borderColor: `${Colors.lightGrey}`,
     paddingHorizontal: 8,
     paddingVertical: 8,
-    borderRadius: 10
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   }
 })
 export default Product;

@@ -13,80 +13,58 @@ import { reactor } from '../../redux/actions/reactor-action';
 import Text from '../../components/Text';
 import { Colors } from '../../theme';
 import DeleteButton from '../../components/DeleteButton';
-const Variants = ({route, dataVariant, items, onChangeValue}) => {
-    console.log('props variants', items)
-    const {goBack, navigate} = useNavigation();
-    const dispatch = useDispatch();
-    const [form, setForm] = useForm(items || {});
-    const {color, size, id, index, productId, longSleeve} = dataVariant || {};
-    const [openVariants, setOpenVariants] = useState(false)
-    const [isEnabled, setIsEnabled] = useState(items.longSleeve);
-    const data =  {  
-                     id: id,
-                     index: index,
-                     variants:{
-                                color: form.color ,
-                                longSleeve: isEnabled,
-                                size: { m: form.size_m || (size ? size.m : 0) ,
-                                        l: form.size_l || (size ? size.l : 0) ,
-                                        xl: form.size_xl || (size ? size.xl : 0) ,
-                                        xxl: form.size_xxl || (size ? size.xxl : 0),
-                                        },
-                     },
-                  };
-    console.log('nlai from', form)
-    const saveData = () => {  
-      // if (id) { dispatch(editVariant(data));} else {dispatch(addVariant(data));}
-      // dispatch(reactor());
-      goBack();
+const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, komponen}) => {
+    const [data, setData] = useState();
+    console.log('props ites', data)
+    const handleChange = (properties, value) => {
+      setData({...data, size: {...data.size,[properties] : value}})
+    }
+    
+    const handleChangeColor = (x) => {
+      setData({...data, color: x})
+    }
+
+    const saveData = () => {
+      onChangeValue(data)  
+      setVisible(false)
     };
 
     const deleteData = () => {
-      dispatch(deleteVariant(id));
-      dispatch(reactor());
-      goBack();
+      onDelete(index)
+      setVisible(false)
     }
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const toggleSwitch = () => setData({...data, longSleeve: !data.longSleeve});
   return (
     <View>
-      <TouchableOpacity
-                  key={index}
-                  onPress={()=>setOpenVariants(true)}                
-                >   
-                    <Text style={style.variantsContainer} >
-                      {items.color}
-                    </Text>
-      </TouchableOpacity> 
+    
       <Modal
-        visible={openVariants}
+        visible={visible}
         animationType="slide"
         transparent={true}
         onRequestClose={() => {
-          setOpenVariants(false);
+          setVisible(false);
         }}
       >
         <Container>
           <View>
-            <TextInput label="Warna" onChangeText={(x)=> setForm('color', x)}>{items.color}</TextInput>
+            <TextInput label="Warna" onChangeText={(x)=> handleChangeColor(x)}>{data?.color}</TextInput>
             <View style={{flexDirection: 'row', marginHorizontal: 8, paddingHorizontal: 30,marginVertical: 10,  alignItems: 'center', justifyContent: 'space-between'}}>
               <Text>Lengan Pendek</Text>
               <Switch
               trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+              thumbColor={data?.longSleeve ? "#f5dd4b" : "#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
               onValueChange={toggleSwitch}
-              value={isEnabled}
+              value={data?.longSleeve}
               />
             <Text>Lengan Panjang</Text>
             </View>
-            <NumberInput step={1} label="M" onChange={(a)=>setForm('m', a)} value={form.size.m}/>
-            <NumberInput step={1} label="L" onChange={(a)=>setForm('l', a)} value={form.size.l}/>
-            <NumberInput step={1} label="XL" onChange={(a)=>setForm('xl', a)} value={form.size.xl}/>
-            <NumberInput step={1} label="XXL" onChange={(a)=>setForm('xxl', a)} value={form.size.xxl}/>
-          {id ? 
-          <DeleteButton text="Hapus" color={Colors.red} onPress={deleteData}/>
-          : null}
-          <Button text="Simpan" onPress={saveData}/>
+            <NumberInput step={1} label="M" onChange={(a)=> handleChange('m', a)} value={data?.size?.m}/>
+            <NumberInput step={1} label="L" onChange={(a)=> handleChange('l', a)} value={data?.size?.l}/>
+            <NumberInput step={1} label="XL" onChange={(a)=> handleChange('xl', a)} value={data?.size?.xl}/>
+            <NumberInput step={1} label="XXL" onChange={(a)=> handleChange('xxl', a)} value={data?.size?.xxl}/> 
+            <DeleteButton text="Hapus" color={Colors.red} onPress={deleteData}/>
+          <Button text="Simpan" onPress={()=> saveData()}/>
           </View>
         </Container>
       </Modal>
