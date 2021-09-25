@@ -315,7 +315,7 @@ const Product = ({route}) => {
                                           <Text>
                                             {items.color}
                                           </Text>
-                                          <Text>{items.size.m + items.size.l + items.size.xl + items.size.xxl}</Text>
+                                          <Text>{items?.size?.m + items?.size?.l + items?.size?.xl + items?.size?.xxl}</Text>
                             </TouchableOpacity> 
                         </View>
               } 

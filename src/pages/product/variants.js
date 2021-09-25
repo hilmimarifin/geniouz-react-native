@@ -14,18 +14,23 @@ import Text from '../../components/Text';
 import { Colors } from '../../theme';
 import DeleteButton from '../../components/DeleteButton';
 const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, komponen}) => {
-    const [data, setData] = useState();
-    console.log('props ites', data)
+    const [data2, setData2] = useState({color: '', longSleeve: false, size: {m: 0, l:0, xl:0, xxl: 0}})
+    useEffect(() => {
+      setData2({...data2, ...items})
+    }, [items])
+
+    console.log('props ites', data2)
+
     const handleChange = (properties, value) => {
-      setData({...data, size: {...data.size,[properties] : value}})
+      setData2({...data2, size: {...data2.size,[properties] : value}})
     }
     
     const handleChangeColor = (x) => {
-      setData({...data, color: x})
+      setData2({...data2, color: x})
     }
 
     const saveData = () => {
-      onChangeValue(data)  
+      onChangeValue(data2)  
       setVisible(false)
     };
 
@@ -33,7 +38,7 @@ const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, k
       onDelete(index)
       setVisible(false)
     }
-    const toggleSwitch = () => setData({...data, longSleeve: !data.longSleeve});
+    const toggleSwitch = () => setData2({...data2, longSleeve: !items.longSleeve});
   return (
     <View>
     
@@ -43,26 +48,27 @@ const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, k
         transparent={true}
         onRequestClose={() => {
           setVisible(false);
+          setData2(items)
         }}
       >
         <Container>
           <View>
-            <TextInput label="Warna" onChangeText={(x)=> handleChangeColor(x)}>{data?.color}</TextInput>
+            <TextInput label="Warna" onChangeText={(x)=> handleChangeColor(x)}>{items?.color}</TextInput>
             <View style={{flexDirection: 'row', marginHorizontal: 8, paddingHorizontal: 30,marginVertical: 10,  alignItems: 'center', justifyContent: 'space-between'}}>
               <Text>Lengan Pendek</Text>
               <Switch
               trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={data?.longSleeve ? "#f5dd4b" : "#f4f3f4"}
+              thumbColor={items?.longSleeve ? "#f5dd4b" : "#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
               onValueChange={toggleSwitch}
-              value={data?.longSleeve}
+              value={data2?.longSleeve}
               />
             <Text>Lengan Panjang</Text>
             </View>
-            <NumberInput step={1} label="M" onChange={(a)=> handleChange('m', a)} value={data?.size?.m}/>
-            <NumberInput step={1} label="L" onChange={(a)=> handleChange('l', a)} value={data?.size?.l}/>
-            <NumberInput step={1} label="XL" onChange={(a)=> handleChange('xl', a)} value={data?.size?.xl}/>
-            <NumberInput step={1} label="XXL" onChange={(a)=> handleChange('xxl', a)} value={data?.size?.xxl}/> 
+            <NumberInput step={1} label="M" onChange={(a)=> handleChange('m', a)} value={items?.size?.m}/>
+            <NumberInput step={1} label="L" onChange={(a)=> handleChange('l', a)} value={items?.size?.l}/>
+            <NumberInput step={1} label="XL" onChange={(a)=> handleChange('xl', a)} value={items?.size?.xl}/>
+            <NumberInput step={1} label="XXL" onChange={(a)=> handleChange('xxl', a)} value={items?.size?.xxl}/> 
             <DeleteButton text="Hapus" color={Colors.red} onPress={deleteData}/>
           <Button text="Simpan" onPress={()=> saveData()}/>
           </View>
