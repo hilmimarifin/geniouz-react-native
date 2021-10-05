@@ -5,6 +5,12 @@ export const get_products = data => {
     payload: data,
   };
 };
+export const get_products_more = data => {
+  return {
+    type: 'GET_PRODUCTS_MORE',
+    payload: data,
+  };
+};
 
 export const addVariant = data => {
   return {

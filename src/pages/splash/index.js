@@ -18,18 +18,27 @@ const SplashScreen = () =>{
     const dispatchRedux = useDispatch();
     const {dispatch} = useNavigation();
     useEffect(()=>{
-        getFromStorage('userData')
-         .then(data => { 
-             setTimeout(() => {
-                if(!data){
-                    dispatch(StackActions.replace('loginStack'))
-                } else {
-                    dispatchRedux(login_success(data))
-                    dispatch(StackActions.replace('homeTab'))
-                }
-             }, 1500);
-        })
-
+      
+          axios.get('https://geniouz-strapi.herokuapp.com/categories')
+          .then(data => {
+            dispatchRedux(get_categories(data.data));
+            axios.get('https://geniouz-strapi.herokuapp.com/brands')
+            .then(data => {
+              dispatchRedux(get_brands(data.data))
+              getFromStorage('userData')
+              .then(data => { 
+                     if(!data){
+                         dispatch(StackActions.replace('loginStack'))
+                     } else {
+                         dispatchRedux(login_success(data))
+                         dispatch(StackActions.replace('homeTab'))
+                     }
+             })
+              })
+            .catch(err => {console.log(err);});    
+            })
+          .catch(err => {console.log(err);});
+  
     }, [])
     return(
         <Container>

@@ -6,6 +6,9 @@ export const productsReducer = (state = INITIAL_STATE, {type, payload}) => {
     case 'GET_PRODUCTS':
       state = payload;
       return state;
+    case 'GET_PRODUCTS_MORE ':
+      state = [...state, ...payload];
+      return state;
     default:
       return state;
   }

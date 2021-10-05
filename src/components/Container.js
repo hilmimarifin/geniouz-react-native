@@ -1,5 +1,5 @@
 import React from 'react';
-import {ScrollView, SafeAreaView} from 'react-native';
+import {ScrollView, SafeAreaView, FlatList, View} from 'react-native';
 import PropTypes from 'prop-types';
 import {withTheme} from '../theme';
 
@@ -23,12 +23,18 @@ const Container = ({
   children,
   transparency,
   refreshControl,
+  flatlist
 }) => (
   <SafeAreaView
     style={{
       flex: 1,
       backgroundColor: !transparency ? theme.background : 'rgba(0, 0, 0, 0.7)',
     }}>
+    {flatlist?
+    <View style={{flex: 1}}>
+      {children}
+    </View>
+    :
     <ScrollView
       scrollEventThrottle={1}
       onScroll={({nativeEvent}) => onScroll(nativeEvent.contentOffset.y)}
@@ -36,6 +42,7 @@ const Container = ({
       refreshControl={refreshControl}>
       {children}
     </ScrollView>
+    }
   </SafeAreaView>
 );
 

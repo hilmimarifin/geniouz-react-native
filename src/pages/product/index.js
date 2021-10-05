@@ -149,10 +149,7 @@ const Product = ({route}) => {
 
    const handleNewVariant = () =>{
     setAddVariant(true);
-
    }
-
-   console.log('nilai variant', form.variants)
 
   const saveData = () =>{
     setLoading(true)
@@ -296,7 +293,7 @@ const Product = ({route}) => {
         </View>
         <TextInput label="Nama" onChangeText={(a)=>setForm('name', a)} >{form.name}</TextInput>
         <BrandsField brandsData={brands} formBrands={form.brand} onChangeValue={a => setForm('brand', a)}/>
-        <CategoriesField onChangeValue={()=>{setForm()}} categories={categories} formCategories={form.categories} id={id}/>
+        <CategoriesField categories={categories} onChangeValue={()=>{setForm()}}  formCategories={form.categories} id={id}/>
         <TextInput  label="Bahan" onChangeText={(a)=>setForm('material', a)}>{form.material}</TextInput>
         <TextInput  label="Shopee URL" onChangeText={(a)=>setForm('shopeeUrl', a)}>{form.shopeeUrl}</TextInput>
         <TextInput label="Tokped URL" onChangeText={(a)=>setForm('tokpedUrl', a)} >{form.tokpedUrl}</TextInput>
@@ -356,8 +353,10 @@ const Product = ({route}) => {
         onDelete={(a) => form.variants.splice(a,1)}
         index={openVariant.index}
         komponen= "Edit"
+        saveText= "Update"
+        deleteButton
       />
-      <Variants komponen="new" visible={addVariant} setVisible={(a) => setAddVariant(a)} onChangeValue={(a) => form.variants.push(a)}/>
+      <Variants saveText="Save" komponen="new" visible={addVariant} setVisible={(a) => setAddVariant(a)} onChangeValue={(a) => form.variants.push(a)}/>
     </Container>
   );
 };

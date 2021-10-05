@@ -1,14 +1,23 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {StyleSheet, View, RefreshControl} from 'react-native';
 import Text from '../../components/Text';
 import Container from '../../components/Container';
 import Header from '../../components/header';
 import { Colors } from '../../theme';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
+import Loading from '../../components/Loading';
 
 const Statistic = () => {
-  const data = useSelector(state => state.productsReducer);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    axios.get('https://geniouz-strapi.herokuapp.com/products?_sort=createdAt:DESC&_limit=-1')
+     .then(res => {setData(res.data) ; setLoading(false)})
+  }, [])
   //menjumlahkan array value
   const sum = (stock) => {
     let total = 0;
@@ -37,9 +46,15 @@ const Statistic = () => {
   const nilaiTotal = hasil.totalNilai;
   const withSparator = String(nilaiTotal).replace(/(.)(?=(\d{3})+$)/g,'$1.');
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    axios.get('https://geniouz-strapi.herokuapp.com/products?_sort=createdAt:DESC&_limit=-1')
+     .then(res => {setData(res.data); setRefreshing(false)})
+  }
   return (
-    <Container>
-        <Header title="Statistic"/>
+    <Container refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={refreshing}/>}>
+        <Header title="Statistik"/>
+        {loading? <Loading /> : 
         <View style={{flexDirection: 'row', flexWrap: 'wrap',
          marginVertical: 10}}>
             <View style={style.boxContainer}>
@@ -50,8 +65,8 @@ const Statistic = () => {
                 <Text small bold>Total Nilai Barang</Text>
                 <Text small> Rp {withSparator}</Text>
             </View>
-
         </View>
+        }
     </Container>
   );
 };

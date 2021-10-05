@@ -13,13 +13,11 @@ import { reactor } from '../../redux/actions/reactor-action';
 import Text from '../../components/Text';
 import { Colors } from '../../theme';
 import DeleteButton from '../../components/DeleteButton';
-const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, komponen}) => {
+const Variants = ({deleteButton, saveText, items, onChangeValue, index, visible, setVisible, onDelete, komponen}) => {
     const [data2, setData2] = useState({color: '', longSleeve: false, size: {m: 0, l:0, xl:0, xxl: 0}})
     useEffect(() => {
       setData2({...data2, ...items})
     }, [items])
-
-    console.log('props ites', data2)
 
     const handleChange = (properties, value) => {
       setData2({...data2, size: {...data2.size,[properties] : value}})
@@ -38,7 +36,7 @@ const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, k
       onDelete(index)
       setVisible(false)
     }
-    const toggleSwitch = () => setData2({...data2, longSleeve: !items.longSleeve});
+    const toggleSwitch = () => setData2({...data2, longSleeve: !data2.longSleeve});
   return (
     <View>
     
@@ -69,8 +67,10 @@ const Variants = ({items, onChangeValue, index, visible, setVisible, onDelete, k
             <NumberInput step={1} label="L" onChange={(a)=> handleChange('l', a)} value={items?.size?.l}/>
             <NumberInput step={1} label="XL" onChange={(a)=> handleChange('xl', a)} value={items?.size?.xl}/>
             <NumberInput step={1} label="XXL" onChange={(a)=> handleChange('xxl', a)} value={items?.size?.xxl}/> 
-            <DeleteButton text="Hapus" color={Colors.red} onPress={deleteData}/>
-          <Button text="Simpan" onPress={()=> saveData()}/>
+            {deleteButton?
+            <DeleteButton text="Hapus" color={Colors.red} onPress={deleteData}/> : null
+            }
+            <Button text={saveText} onPress={()=> saveData()}/>
           </View>
         </Container>
       </Modal>
